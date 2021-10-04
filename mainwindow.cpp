@@ -7,8 +7,8 @@
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+:   QMainWindow(parent), 
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -28,19 +28,30 @@ MainWindow::~MainWindow()
 
 
 
-void MainWindow::init()
+void    MainWindow::init()
 {
-    connect(    ui->selectFolderButton,    SIGNAL(clicked()),      this,       SLOT(selet_folder_slot())   );
+    connect(    ui->selectFolderButton,    &QPushButton::clicked,      this,        &MainWindow::selet_folder_slot   );
+    connect(    &worker,                   &Worker::finished,          this,        &MainWindow::finish_worker       );
 }
 
 
 
 
-void MainWindow::selet_folder_slot()
+void    MainWindow::selet_folder_slot()
 {
-    QString dirname = QFileDialog::getExistingDirectory( this, tr("select dir"), "D:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+    QString dir     =   QFileDialog::getExistingDirectory( this, tr("select dir"), "D:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
     ui->selectFolderButton->setDisabled(true);
 
+    worker.set_root( dir );
     worker.start();
+}
+
+
+
+
+
+void    MainWindow::finish_worker()
+{
+    ui->selectFolderButton->setDisabled(false);
 }
 

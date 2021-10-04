@@ -18,18 +18,19 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow( QWidget *parent = nullptr );
     ~MainWindow();
 
 public slots:
-    void selet_folder_slot();
+    void    selet_folder_slot();
+    void    finish_worker();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow  *ui;
 
-    void init();
+    void    init();
 
-    Worker worker;
+    Worker  worker;
 };
 
 
