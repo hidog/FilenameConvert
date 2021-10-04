@@ -40,5 +40,7 @@ void MainWindow::selet_folder_slot()
 {
     QString dirname = QFileDialog::getExistingDirectory( this, tr("select dir"), "D:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
     ui->selectFolderButton->setDisabled(true);
+
+    worker.start();
 }
 
