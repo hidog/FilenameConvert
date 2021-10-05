@@ -55,10 +55,12 @@ public:
     const QFileInfoList&    get_scan_list();
 
 signals:
-    void    scan_item_name_sig( QString );
-
+    void    message_sig( QString );
+    void    progress_init_sig( int, int );
+    void    progress_sig( int );
 
 private:
+    int     solved_count    =   0;
 
     QString         src, dst;
     Mode            mode;

@@ -37,13 +37,18 @@ void    Worker::run()
             try {
                 assert( conv == nullptr );
 
-                conv    =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
-                //codec   =   QTextCodec::codecForName("Big5");
+                emit progress_init_sig( 0, scan_list.size() );
+
+                conv            =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
+                //codec         =   QTextCodec::codecForName("Big5");
+                solved_count    =   0;
 
                 rename( src, dst );
 
                 delete conv;
                 conv    =   nullptr;
+
+                qDebug() << "solved_count = " << solved_count;
 
             } catch( std::exception err ) {
                 qDebug() << err.what();
@@ -73,35 +78,43 @@ Mode    Worker::get_mode()
 
 void    Worker::rename( QString src, QString dst )
 {
-    qDebug() << "src = " << src << "\ndst = " << dst << "\n";
+    //qDebug() << "src = " << src << "\ndst = " << dst << "\n";
+    
+    QDir    src_dir(src);
+    QDir    dst_dir(dst);       
+    
+    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+    QFileInfoList   list    =   src_dir.entryInfoList();
+    
+    std::string     utf8_tc_str;  // tc = tradition chinese
+    //std::string     big5_str;
+    QString         dst_path, dst_name;
+    
+    bool    flag;
+    
+    //
+    //for( auto& info : list )
+    for( int i = 0; i < list.size(); i++ )
+    {
+        auto info = list.at(i);
+        auto qstr = info.fileName();
+        qstr.remove( QChar(' ') );
+    
+        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
+        //big5_str        =   codec->fromUnicode( QString(utf8_tc_str.c_str()) );
+    
+        dst_name    =   utf8_tc_str.c_str();
 
-    try {
-        QDir    src_dir(src);
-        QDir    dst_dir(dst);       
+        //qDebug() << "dst_name = " << dst_name;    
 
-        src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-        QFileInfoList   list    =   src_dir.entryInfoList();
-
-        std::string     utf8_tc_str;  // tc = tradition chinese
-        //std::string     big5_str;
-        QString         dst_path, dst_name;
-
-        bool    flag;
-
-        //
-        for( auto& info : list )
+        if( info.isFile() == true )
         {
-            auto qstr = info.fileName();
-            qstr.remove( QChar(' ') );
-
-            utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-            //big5_str        =   codec->fromUnicode( QString(utf8_tc_str.c_str()) );
-
-            dst_name    =   utf8_tc_str.c_str();
-
-            if( info.isFile() == true )
+            dst_path    =   dst_dir.filePath(dst_name);
+            
+            if( QFile::exists(dst_path) == true )            
+                qDebug() << "file exist. " << dst_path;            
+            else
             {
-                dst_path    =   dst_dir.filePath(dst_name);
                 QFile   src_file( info.absoluteFilePath() );
                 flag        =   src_file.copy( dst_path );
                 if( flag == false )
@@ -110,23 +123,26 @@ void    Worker::rename( QString src, QString dst )
                     assert(false);
                 }
             }
-            else if( info.isDir() == true )
-            {
-                flag   =   dst_dir.mkdir( dst_name );
-                if( flag == false )
-                {
-                    qDebug() << "error";
-                    assert(false);
-                }
-                rename( info.absoluteFilePath(), dst_dir.filePath(dst_name) );
-            }
-            else
-                assert(false);
+
+            solved_count++;
+            emit progress_sig(solved_count);
+            emit message_sig( QString("copy file %1").arg(dst_name) );
         }
-
-
-    } catch( std::exception err ) {
-        throw err;
+        else if( info.isDir() == true )
+        {
+            flag   =   dst_dir.mkdir( dst_name );
+            if( flag == false )
+            {
+                qDebug() << "error";
+                assert(false);
+            }
+            solved_count++;
+            emit progress_sig(solved_count);
+            emit message_sig( QString("make dir %1").arg(dst_name) );
+            rename( info.absoluteFilePath(), dst_dir.filePath(dst_name) );
+        }
+        else
+            assert(false);
     }
 }
 
@@ -152,7 +168,7 @@ void    Worker::scan_folder( QString path )
 
     for( auto& info : list )
     {
-        emit scan_item_name_sig( QString("scan item %1").arg(info.fileName()) );
+        emit message_sig( QString("scan item %1").arg(info.fileName()) );
 
         scan_list.push_back(info);
         scan_folder( info.absoluteFilePath() );

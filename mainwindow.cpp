@@ -35,8 +35,10 @@ void    MainWindow::init()
     connect(    ui->scanButton,             &QPushButton::clicked,          this,               &MainWindow::scan_slot              );
     connect(    ui->renameButton,           &QPushButton::clicked,          this,               &MainWindow::rename_slot            );
     connect(    &worker,                    &Worker::finished,              this,               &MainWindow::finish_worker_slot     );
-    connect(    &worker,                    &Worker::scan_item_name_sig,    ui->messageEdit,    &QLineEdit::setText                 );
+    connect(    &worker,                    &Worker::message_sig,           ui->messageEdit,    &QLineEdit::setText                 );
     connect(    ui->fullNameCheckBox,       &QCheckBox::stateChanged,       this,               &MainWindow::full_path_slot         );
+    connect(    &worker,                    &Worker::progress_init_sig,     ui->progressBar,    &QProgressBar::setRange             );
+    connect(    &worker,                    &Worker::progress_sig,          ui->progressBar,    &QProgressBar::setValue             );
 }
 
 
@@ -112,6 +114,13 @@ void    MainWindow::scan_slot()
 
 void    MainWindow::rename_slot()
 {
+    const QFileInfoList&    list    =   worker.get_scan_list();
+    if( list.size() == 0 )
+    {
+        QMessageBox::warning( nullptr, "rename", "need scan or folder is empty.", QMessageBox::Ok, QMessageBox::Ok );
+        return;
+    }
+
     lock_button(true);
     bool    result  =   false;
 
@@ -222,4 +231,6 @@ void    MainWindow::lock_button( bool lock )
 {
     ui->selectSrcButton->setDisabled(lock);
     ui->selectDstButton->setDisabled(lock);
+    ui->scanButton->setDisabled(lock);
+    ui->renameButton->setDisabled(lock);
 }
