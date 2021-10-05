@@ -21,7 +21,8 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    worker.h
+    worker.h \
+    setting.h
 
 FORMS += \
     mainwindow.ui

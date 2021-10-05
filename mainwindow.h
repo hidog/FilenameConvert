@@ -22,14 +22,12 @@ public:
     ~MainWindow();
 
 public slots:
-    void    selet_folder_slot();
+    void    selet_src_slot();
     void    finish_worker();
 
 private:
     Ui::MainWindow  *ui;
-
     void    init();
-
     Worker  worker;
 };
 
