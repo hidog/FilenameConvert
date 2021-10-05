@@ -8,6 +8,14 @@
 
 
 
+enum class Mode 
+{
+    DEFAULT     =   0,
+    SCAN,
+};
+
+
+
 
 class Worker : public QThread
 {
@@ -23,16 +31,18 @@ public:
 
     void    run() override;
 
-    void    set_root( QString path );
+    void    set_mode( Mode m );
+    void    set_src( QString path );
     void    scan_folder( QString path );
 
-    void    detect_code( std::wstring str );
+signals:
+    void    scan_item_name_sig( QString );
+
 
 private:
 
-    QString root;
-
-
+    QString     src;
+    Mode        mode;
 };
 
 

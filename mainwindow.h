@@ -26,12 +26,14 @@ public:
 public slots:
     void    selet_src_slot();
     void    selet_dst_slot();
-    void    finish_worker();
+    void    scan_slot();
+    void    finish_worker_slot();
 
 private:
     Ui::MainWindow  *ui;
 
     void    init();
+    void    lock_button( bool lock );
 
     Worker      worker;
     Setting     setting;
