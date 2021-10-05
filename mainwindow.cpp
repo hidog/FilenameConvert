@@ -35,7 +35,23 @@ void    MainWindow::init()
     connect(    ui->scanButton,             &QPushButton::clicked,          this,               &MainWindow::scan_slot              );
     connect(    &worker,                    &Worker::finished,              this,               &MainWindow::finish_worker_slot     );
     connect(    &worker,                    &Worker::scan_item_name_sig,    ui->messageEdit,    &QLineEdit::setText                 );
+    connect(    ui->fullNameCheckBox,       &QCheckBox::stateChanged,       this,               &MainWindow::full_path_slot         );
 }
+
+
+
+
+
+void    MainWindow::full_path_slot( int state )
+{
+    ui->messageEdit->setText( QString("change full path state. %1").arg(state) );
+
+    if( state == Qt::Checked )
+        ui->itemBrowser->setText( full_file_str );
+    else
+        ui->itemBrowser->setText( file_str );
+}
+
 
 
 
@@ -96,6 +112,63 @@ void    MainWindow::scan_slot()
 void    MainWindow::finish_worker_slot()
 {
     lock_button(false);
+    ui->messageEdit->setText("finish scan.");
+
+    file_str.clear();
+    full_file_str.clear();
+
+    const QFileInfoList& list   =   worker.get_scan_list();
+
+    file_str        +=  QString("file count = %1\n").arg(list.size());
+    full_file_str   +=  QString("file count = %1\n").arg(list.size());
+    file_str        +=  analysis_ext(list);
+    full_file_str   +=  analysis_ext(list);
+
+    for( auto& item : list )
+    {
+        file_str        +=  item.fileName();
+        full_file_str   +=  item.absoluteFilePath();
+        file_str        +=  "\n";
+        full_file_str   +=  "\n";
+    }
+
+    if( ui->fullNameCheckBox->checkState() == Qt::Checked )
+        ui->itemBrowser->setText( full_file_str );
+    else
+        ui->itemBrowser->setText( file_str );
+}
+
+
+
+
+
+QString     MainWindow::analysis_ext( const QFileInfoList& list )
+{
+    QList<QString>  ext_list;
+    QString         ext;
+    QString         result;
+
+    for( auto& item : list )
+    {
+        if( item.isFile() == true )
+        {
+            ext     =   item.suffix();
+            if( ext_list.contains(ext) == false )
+                ext_list.push_back(ext);
+        }
+    }
+
+    result  =   "extension list : ";
+    for( auto& itr : ext_list )
+    {
+        result  +=  itr;
+        result  +=  ", ";
+    }
+    int     size    =   result.size();
+    result.remove( size-2, 2 );
+    result  +=  "\n";
+
+    return  result;
 }
 
 

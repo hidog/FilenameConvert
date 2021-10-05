@@ -19,14 +19,15 @@ void    Worker::run()
             qDebug() << "src is empty.";
             assert(false);
         }
-        else        
+        else
+        {
+            scan_list.clear();
             scan_folder( src );        
+        }
         break;
     default:
         assert(false);
     }
-
-
 }
 
 
@@ -75,9 +76,18 @@ void    Worker::scan_folder( QString path )
         emit scan_item_name_sig( QString("scan item %1").arg(info.fileName()) );
         qDebug() << info.fileName();
 
+        scan_list.push_back(info);
         scan_folder( info.absoluteFilePath() );
     }
 
+}
+
+
+
+
+const QFileInfoList&    Worker::get_scan_list()
+{
+    return  scan_list;
 }
 
 

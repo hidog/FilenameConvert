@@ -35,14 +35,18 @@ public:
     void    set_src( QString path );
     void    scan_folder( QString path );
 
+    const QFileInfoList&    get_scan_list();
+
 signals:
     void    scan_item_name_sig( QString );
 
 
 private:
 
-    QString     src;
-    Mode        mode;
+    QString         src;
+    Mode            mode;
+
+    QFileInfoList   scan_list;
 };
 
 

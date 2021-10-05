@@ -120,6 +120,32 @@
       <height>31</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="itemBrowser">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>200</y>
+      <width>1231</width>
+      <height>461</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="fullNameCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>130</y>
+      <width>171</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>full file path</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

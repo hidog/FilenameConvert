@@ -28,15 +28,18 @@ public slots:
     void    selet_dst_slot();
     void    scan_slot();
     void    finish_worker_slot();
+    void    full_path_slot( int state );
 
 private:
     Ui::MainWindow  *ui;
 
-    void    init();
-    void    lock_button( bool lock );
+    void        init();
+    void        lock_button( bool lock );
+    QString     analysis_ext( const QFileInfoList& list );
 
     Worker      worker;
     Setting     setting;
+    QString     file_str,   full_file_str;
 };
 
 
