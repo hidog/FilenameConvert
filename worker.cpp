@@ -25,6 +25,16 @@ void    Worker::run()
             scan_folder( src );        
         }
         break;
+    case Mode::RENAME :
+        if( src.isEmpty() == true || dst.isEmpty() == true )
+        {
+            qDebug() << "src or dst is empty.";
+            assert(false);
+        }
+        else        
+            rename( src, dst );
+        
+        break;
     default:
         assert(false);
     }
@@ -33,19 +43,17 @@ void    Worker::run()
 
 
 
-
-
-void    Worker::set_mode( Mode m )
+Mode    Worker::get_mode()
 {
-    mode    =   m;
+    return mode;
 }
 
 
 
 
-
-void    Worker::scan_folder( QString path )
+void    Worker::rename( QString src, QString dst )
 {
+#if 0
     QDir    dir(path);
 
     dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
@@ -69,17 +77,46 @@ void    Worker::scan_folder( QString path )
 
         /*if( info.isFile() == true )
         {
-            QString filename = info.fileName();
-            //codec->fromUnicode( filename );
+        QString filename = info.fileName();
+        //codec->fromUnicode( filename );
         }*/
 
         emit scan_item_name_sig( QString("scan item %1").arg(info.fileName()) );
-        qDebug() << info.fileName();
+        //qDebug() << info.fileName();
 
         scan_list.push_back(info);
         scan_folder( info.absoluteFilePath() );
     }
+#endif
+}
 
+
+
+
+
+void    Worker::set_mode( Mode m )
+{
+    mode    =   m;
+}
+
+
+
+
+
+void    Worker::scan_folder( QString path )
+{
+    QDir    dir(path);
+
+    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+    QFileInfoList   list    =   dir.entryInfoList();
+
+    for( auto& info : list )
+    {
+        emit scan_item_name_sig( QString("scan item %1").arg(info.fileName()) );
+
+        scan_list.push_back(info);
+        scan_folder( info.absoluteFilePath() );
+    }
 }
 
 
@@ -98,4 +135,13 @@ const QFileInfoList&    Worker::get_scan_list()
 void    Worker::set_src( QString path )
 {
     src     =   path;
+}
+
+
+
+
+
+void    Worker::set_dst( QString path )
+{
+    dst     =   path;
 }

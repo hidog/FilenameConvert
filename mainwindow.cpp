@@ -33,6 +33,7 @@ void    MainWindow::init()
     connect(    ui->selectSrcButton,        &QPushButton::clicked,          this,               &MainWindow::selet_src_slot         );
     connect(    ui->selectDstButton,        &QPushButton::clicked,          this,               &MainWindow::selet_dst_slot         );
     connect(    ui->scanButton,             &QPushButton::clicked,          this,               &MainWindow::scan_slot              );
+    connect(    ui->renameButton,           &QPushButton::clicked,          this,               &MainWindow::rename_slot            );
     connect(    &worker,                    &Worker::finished,              this,               &MainWindow::finish_worker_slot     );
     connect(    &worker,                    &Worker::scan_item_name_sig,    ui->messageEdit,    &QLineEdit::setText                 );
     connect(    ui->fullNameCheckBox,       &QCheckBox::stateChanged,       this,               &MainWindow::full_path_slot         );
@@ -109,33 +110,75 @@ void    MainWindow::scan_slot()
 
 
 
+void    MainWindow::rename_slot()
+{
+    lock_button(true);
+    bool    result  =   false;
+
+    if( setting.dst == setting.src )
+        QMessageBox::warning( nullptr, "Setting", "src == dst", QMessageBox::Ok, QMessageBox::Ok );
+    else if( setting.dst.isEmpty() )
+        QMessageBox::warning( nullptr, "Setting", "dst is empty", QMessageBox::Ok, QMessageBox::Ok );
+    else if( setting.src.isEmpty() )
+        QMessageBox::warning( nullptr, "Setting", "src is empty", QMessageBox::Ok, QMessageBox::Ok );
+    else if( QDir(setting.src).exists() == false )
+        QMessageBox::warning( nullptr, "Setting", "src is not exist", QMessageBox::Ok, QMessageBox::Ok );
+    else if( QDir(setting.dst).exists() == false )
+        QMessageBox::warning( nullptr, "Setting", "dst is not exist", QMessageBox::Ok, QMessageBox::Ok );
+    else
+    {
+        result  =   true;
+        worker.set_mode( Mode::RENAME );
+        worker.set_src( setting.src );
+        worker.set_dst( setting.dst );
+        worker.start();
+    }
+
+    if( result == false )
+        lock_button(false);
+
+}
+
+
+
+
+
+
 void    MainWindow::finish_worker_slot()
 {
     lock_button(false);
-    ui->messageEdit->setText("finish scan.");
 
-    file_str.clear();
-    full_file_str.clear();
-
-    const QFileInfoList& list   =   worker.get_scan_list();
-
-    file_str        +=  QString("file count = %1\n").arg(list.size());
-    full_file_str   +=  QString("file count = %1\n").arg(list.size());
-    file_str        +=  analysis_ext(list);
-    full_file_str   +=  analysis_ext(list);
-
-    for( auto& item : list )
+    if( worker.get_mode() == Mode::SCAN )
     {
-        file_str        +=  item.fileName();
-        full_file_str   +=  item.absoluteFilePath();
-        file_str        +=  "\n";
-        full_file_str   +=  "\n";
-    }
+        ui->messageEdit->setText("finish scan.");
 
-    if( ui->fullNameCheckBox->checkState() == Qt::Checked )
-        ui->itemBrowser->setText( full_file_str );
+        file_str.clear();
+        full_file_str.clear();
+
+        const QFileInfoList& list   =   worker.get_scan_list();
+
+        file_str        +=  QString("file count = %1\n").arg(list.size());
+        full_file_str   +=  QString("file count = %1\n").arg(list.size());
+        file_str        +=  analysis_ext(list);
+        full_file_str   +=  analysis_ext(list);
+
+        for( auto& item : list )
+        {
+            file_str        +=  item.fileName();
+            full_file_str   +=  item.absoluteFilePath();
+            file_str        +=  "\n";
+            full_file_str   +=  "\n";
+        }
+
+        if( ui->fullNameCheckBox->checkState() == Qt::Checked )
+            ui->itemBrowser->setText( full_file_str );
+        else
+            ui->itemBrowser->setText( file_str );
+    }
+    else if( worker.get_mode() == Mode::RENAME )
+    {}
     else
-        ui->itemBrowser->setText( file_str );
+        assert(false);
 }
 
 
