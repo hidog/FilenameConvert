@@ -2,9 +2,10 @@
 
 #include <QDebug>
 #include <QDir>
-#include <QTextCodec>
 #include <cassert>
 
+#include <opencc/opencc.h>
+#include <QTextCodec>
 
 
 
@@ -32,7 +33,25 @@ void    Worker::run()
             assert(false);
         }
         else        
-            rename( src, dst );
+        {
+            try {
+                assert( conv == nullptr );
+
+                conv    =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
+                codec   =   QTextCodec::codecForName("Big5");
+
+                rename( src, dst );
+
+                delete conv;
+                conv    =   nullptr;
+
+            } catch( std::exception err ) {
+                qDebug() << err.what();
+                delete conv;
+                conv    =   nullptr;
+                assert(false);
+            }
+        }
         
         break;
     default:
@@ -53,41 +72,46 @@ Mode    Worker::get_mode()
 
 void    Worker::rename( QString src, QString dst )
 {
-#if 0
-    QDir    dir(path);
+    try {
+        QDir    dir(src);
 
-    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-    QFileInfoList   list    =   dir.entryInfoList();
+        dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+        QFileInfoList   list    =   dir.entryInfoList();
 
-    //QTextCodec *codec = QTextCodec::codecForName("GB18030");
+        std::string     utf8_tc_str;  // tc = tradition chinese
+        std::string     big5_str;
 
-    //for( int i = 0; i < list.size(); ++i )
-    for( auto& info : list )
-    {
-        //QFileInfo info  =   list.at(i);
-        //qDebug() << info.fileName();
-
-        //auto fn = info.fileName();
-        //auto res = codec->fromUnicode( fn );
-        //fprintf( p, "%s\n", res.data() );
-
-        //auto qstr = info.fileName();
-        //qstr.remove( QChar(' ') );
-
-
-        /*if( info.isFile() == true )
+        for( auto& info : list )
         {
-        QString filename = info.fileName();
-        //codec->fromUnicode( filename );
-        }*/
+            //auto fn = info.fileName();
+            //auto res = codec->fromUnicode( fn );
+            //fprintf( p, "%s\n", res.data() );
 
-        emit scan_item_name_sig( QString("scan item %1").arg(info.fileName()) );
-        //qDebug() << info.fileName();
+            auto qstr = info.fileName();
+            qstr.remove( QChar(' ') );
 
-        scan_list.push_back(info);
-        scan_folder( info.absoluteFilePath() );
+            utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
+            big5_str        =   codec->fromUnicode( QString(utf8_tc_str.c_str()) );
+
+            qDebug() << big5_str.c_str();
+
+            /*if( info.isFile() == true )
+            {
+            QString filename = info.fileName();
+            //codec->fromUnicode( filename );
+            }*/
+
+            //emit scan_item_name_sig( QString("scan item %1").arg(info.fileName()) );
+            //qDebug() << info.fileName();
+
+            //scan_list.push_back(info);
+            rename( info.absoluteFilePath(), dst );
+        }
+
+
+    } catch( std::exception err ) {
+        throw err;
     }
-#endif
 }
 
 

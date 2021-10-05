@@ -8,12 +8,24 @@
 
 
 
+
+namespace opencc {
+    class SimpleConverter;
+} // end namespace opencc
+class QTextCodec;
+
+
+
+
+
+
 enum class Mode 
 {
     DEFAULT     =   0,
     SCAN,
     RENAME,
 };
+
 
 
 
@@ -53,6 +65,10 @@ private:
     Mode            mode;
 
     QFileInfoList   scan_list;
+
+    opencc::SimpleConverter   *conv     =   nullptr;
+    QTextCodec                *codec    =   nullptr;
+
 };
 
 

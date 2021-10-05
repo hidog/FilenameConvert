@@ -15,9 +15,12 @@ win32 {
     CONFIG -= app_bundle
 }
 
+INCLUDEPATH += opencc/include
 
-Debug:LIBPATH += lib/lib/debug
+Debug:LIBPATH += opencc/lib/debug
+Release:LIBPATH += opencc/lib/release
 
+LIBS += -lopencc
 
 SOURCES += \
     main.cpp \
