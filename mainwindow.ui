@@ -56,7 +56,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>SRC :</string>
+     <string>SRC</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="srcEdit">
@@ -67,6 +67,35 @@
       <width>301</width>
       <height>31</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>140</y>
+      <width>41</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DST</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="dstEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>140</y>
+      <width>301</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

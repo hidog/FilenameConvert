@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "worker.h"
+#include "setting.h"
+
 
 
 QT_BEGIN_NAMESPACE
@@ -23,12 +25,16 @@ public:
 
 public slots:
     void    selet_src_slot();
+    void    selet_dst_slot();
     void    finish_worker();
 
 private:
     Ui::MainWindow  *ui;
+
     void    init();
-    Worker  worker;
+
+    Worker      worker;
+    Setting     setting;
 };
 
 
