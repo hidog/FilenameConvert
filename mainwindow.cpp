@@ -30,7 +30,7 @@ MainWindow::~MainWindow()
 
 void    MainWindow::init()
 {
-    connect(    ui->selectFolderButton,    &QPushButton::clicked,      this,        &MainWindow::selet_folder_slot   );
+    connect(    ui->selectSrcButton,       &QPushButton::clicked,      this,        &MainWindow::selet_folder_slot   );
     connect(    &worker,                   &Worker::finished,          this,        &MainWindow::finish_worker       );
 }
 
@@ -40,7 +40,7 @@ void    MainWindow::init()
 void    MainWindow::selet_folder_slot()
 {
     QString dir     =   QFileDialog::getExistingDirectory( this, tr("select dir"), "D:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
-    ui->selectFolderButton->setDisabled(true);
+    ui->selectSrcButton->setDisabled(true);
 
     worker.set_root( dir );
     worker.start();
@@ -52,6 +52,6 @@ void    MainWindow::selet_folder_slot()
 
 void    MainWindow::finish_worker()
 {
-    ui->selectFolderButton->setDisabled(false);
+    ui->selectSrcButton->setDisabled(false);
 }
 

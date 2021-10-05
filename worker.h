@@ -26,7 +26,7 @@ public:
     void    set_root( QString path );
     void    scan_folder( QString path );
 
-    void    detect_code( std::string str );
+    void    detect_code( std::wstring str );
 
 private:
 

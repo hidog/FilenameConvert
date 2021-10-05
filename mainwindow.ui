@@ -20,17 +20,53 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="selectFolderButton">
+   <widget class="QPushButton" name="selectSrcButton">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>30</x>
       <y>20</y>
-      <width>131</width>
+      <width>161</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Select Folder</string>
+     <string>Select Src Folder</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="selectDstButton">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>20</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Select Dst Folder</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>80</y>
+      <width>51</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>SRC :</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="srcEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>80</y>
+      <width>301</width>
+      <height>31</height>
+     </rect>
     </property>
    </widget>
   </widget>
