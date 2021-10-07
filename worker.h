@@ -5,7 +5,7 @@
 #include <QString>
 #include <QDir>
 #include <string>
-
+#include <functional>
 
 
 
@@ -60,6 +60,17 @@ signals:
     void    progress_sig( int );
 
 private:
+    std::function<void(QFileInfo,QDir,QString)>     rename_file, rename_folder;
+
+    void    rename_file_basic( QFileInfo info, QDir dst_dir, QString dst_name );
+    void    rename_folder_basic( QFileInfo info, QDir dst_dir, QString dst_name );
+
+    void    rename_file_remove_full( QFileInfo info, QDir dst_dir, QString dst_name );
+    void    rename_folder_remove_full( QFileInfo info, QDir dst_dir, QString dst_name );
+
+    void    rename_file_remove_prefix( QFileInfo info, QDir dst_dir, QString dst_name );
+    void    rename_folder_remove_prefix( QFileInfo info, QDir dst_dir, QString dst_name );
+
     int     solved_count    =   0;
 
     QString         src, dst;
