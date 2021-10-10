@@ -5,7 +5,7 @@
 #include <cassert>
 
 #include <opencc/opencc.h>
-//#include <QTextCodec>
+#include <QTextCodec>
 
 
 
@@ -23,10 +23,40 @@ void    Worker::run()
     case Mode::REMOVE :
         handle_remove();
         break;
+    case Mode::CONVERT :
+        handle_convert();
+        break;
     default:
         assert(false);
     }
 }
+
+
+
+
+
+void    Worker::handle_convert()
+{
+    if( src.isEmpty() == true )
+    {
+        qDebug() << "src is empty.";
+        assert(false);
+    }
+    else
+    {
+        codec   =   QTextCodec::codecForName("Big5");
+        conv    =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
+
+        convert( src );    
+        emit message_sig( QString("finish convert.") );
+
+        delete conv;
+        conv    =   nullptr;
+    }
+}
+
+
+
 
 
 
@@ -41,9 +71,66 @@ void    Worker::handle_remove()
     {
         remove( src );    
         emit message_sig( QString("finish remove.") );
-
     }
 }
+
+
+
+
+void    Worker::convert( QString path )
+{
+    QDir    dir(path);
+    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+
+    QFileInfoList   list   =   dir.entryInfoList();
+    QFileInfo       info;
+    bool            res;
+    std::string     big5_str,   str;
+
+
+    int     i;
+    for( i = 0; i < list.size(); i++ )
+    {
+        info    =   list.at(i);
+        if( info.suffix() == QString("cue") )
+        {
+            QFile       file( info.absoluteFilePath() );
+            QString     output;
+
+            if( file.open( QIODevice::ReadWrite | QIODevice::Text ) == false )
+            {
+                qDebug() << "error !!";
+                assert(false);
+            }
+            else
+            {
+                emit message_sig( QString("convert file. %1").arg(info.absoluteFilePath()) );
+
+                while( file.atEnd() == false )
+                {
+                    QString line    =   file.readLine();
+                    big5_str        =   conv->Convert( line.toStdString() );
+                    str             =   codec->fromUnicode( QString("%1").arg(big5_str.c_str()) );
+                    output          +=  QString( "%1" ).arg(big5_str.c_str());
+                }
+                
+                file.remove();
+                file.close();
+                QFile   file2( info.absoluteFilePath() );
+                file2.open( QIODevice::ReadWrite | QIODevice::Text );
+                QTextStream out(&file2);
+                out << output;
+                file2.close();
+            }
+        }
+        else if( info.isDir() == true )
+        {
+            convert( info.absoluteFilePath() );
+        }
+    }
+}
+
+
 
 
 
@@ -78,13 +165,6 @@ void    Worker::remove( QString path )
                 emit message_sig( QString("rm file. %1").arg(info.absoluteFilePath()) );
 
                 QFile       file(info.absoluteFilePath());
-                /*QString     dst_path    =   QString("D:\\tmp\\%1").arg(info.fileName());
-                res     =   file.copy( dst_path );
-                if( res == false )
-                {
-                    qDebug() << "error " << info.absoluteFilePath();
-                    assert(false);
-                }*/
                 file.moveToTrash();
             }
         }
@@ -141,12 +221,15 @@ void    Worker::handle_rename()
     }
     else        
     {
+        // 基本的轉換檔名
         rename_file     =   std::bind( &Worker::rename_file_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
         rename_folder   =   std::bind( &Worker::rename_folder_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
 
+        // 移除全形英文
         //rename_file     =   std::bind( &Worker::rename_file_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
         //rename_folder   =   std::bind( &Worker::rename_folder_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
 
+        // 某個檔案會用檔名的方式區別動畫名稱跟曲名, 這個會將動畫名稱新建資料夾
         //rename_file     =   std::bind( &Worker::rename_file_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );           
         //rename_folder   =   std::bind( &Worker::rename_folder_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
 
@@ -155,7 +238,6 @@ void    Worker::handle_rename()
             emit progress_init_sig( 0, scan_list.size() );
 
             conv            =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
-            //codec         =   QTextCodec::codecForName("Big5");
             solved_count    =   0;
 
             rename( src, dst );
@@ -213,7 +295,6 @@ void    Worker::rename( QString src, QString dst )
         //qstr.remove( QChar(' ') );
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        //big5_str        =   codec->fromUnicode( QString(utf8_tc_str.c_str()) );
     
         dst_name    =   utf8_tc_str.c_str();
         //qDebug() << "dst_name = " << dst_name;    

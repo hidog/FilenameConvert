@@ -12,7 +12,7 @@
 namespace opencc {
     class SimpleConverter;
 } // end namespace opencc
-//class QTextCodec;
+class QTextCodec;
 
 
 
@@ -25,6 +25,7 @@ enum class Mode
     SCAN,
     RENAME,
     REMOVE,
+    CONVERT,
 };
 
 
@@ -52,10 +53,12 @@ public:
     void    scan_folder( QString path );    
     void    rename( QString src, QString dst );
     void    remove( QString path );
+    void    convert( QString path );
 
     void    handle_rename();
     void    handle_scan();
     void    handle_remove();
+    void    handle_convert();
 
     const QFileInfoList&    get_scan_list();
 
@@ -84,7 +87,7 @@ private:
     QFileInfoList   scan_list;
 
     opencc::SimpleConverter   *conv     =   nullptr;
-    //QTextCodec                *codec    =   nullptr;
+    QTextCodec                *codec    =   nullptr;
 
 };
 

@@ -28,9 +28,11 @@ public slots:
     void    selet_dst_slot();
     void    scan_slot();
     void    rename_slot();
+
     void    finish_worker_slot();
     void    full_path_slot( int state );
     void    remove_slot();
+    void    convert_slot();
 
 private:
     Ui::MainWindow  *ui;

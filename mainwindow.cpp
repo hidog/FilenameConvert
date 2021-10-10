@@ -30,11 +30,15 @@ MainWindow::~MainWindow()
 
 void    MainWindow::init()
 {
+    // 本來希望做檔案內容轉換big5, gb, 但功能上有點問題, 故先關閉
+    ui->convertButton->setDisabled(true);
+
     connect(    ui->selectSrcButton,        &QPushButton::clicked,          this,               &MainWindow::selet_src_slot         );
     connect(    ui->selectDstButton,        &QPushButton::clicked,          this,               &MainWindow::selet_dst_slot         );
     connect(    ui->scanButton,             &QPushButton::clicked,          this,               &MainWindow::scan_slot              );
     connect(    ui->renameButton,           &QPushButton::clicked,          this,               &MainWindow::rename_slot            );
     connect(    ui->removeButton,           &QPushButton::clicked,          this,               &MainWindow::remove_slot            );
+    connect(    ui->convertButton,          &QPushButton::clicked,          this,               &MainWindow::convert_slot           );
 
     connect(    &worker,                    &Worker::finished,              this,               &MainWindow::finish_worker_slot     );
     connect(    &worker,                    &Worker::message_sig,           ui->messageEdit,    &QLineEdit::setText                 );
@@ -69,6 +73,34 @@ void    MainWindow::remove_slot()
     if( result == false )
         lock_button(false);
 }
+
+
+
+
+
+
+void    MainWindow::convert_slot()
+{
+    lock_button(true);
+
+    bool    result  =   false;
+
+    if( setting.src.isEmpty() )
+        QMessageBox::warning( nullptr, "Setting", "src is empty", QMessageBox::Ok, QMessageBox::Ok );
+    else if( QDir(setting.src).exists() == false )
+        QMessageBox::warning( nullptr, "Setting", "src is not exist", QMessageBox::Ok, QMessageBox::Ok );
+    else
+    {
+        result  =   true;
+        worker.set_mode( Mode::CONVERT );
+        worker.set_src( setting.src );
+        worker.start();
+    }
+
+    if( result == false )
+        lock_button(false);
+}
+
 
 
 
