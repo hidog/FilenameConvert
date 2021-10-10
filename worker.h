@@ -24,8 +24,8 @@ enum class Mode
     DEFAULT     =   0,
     SCAN,
     RENAME,
+    REMOVE,
 };
-
 
 
 
@@ -51,6 +51,11 @@ public:
 
     void    scan_folder( QString path );    
     void    rename( QString src, QString dst );
+    void    remove( QString path );
+
+    void    handle_rename();
+    void    handle_scan();
+    void    handle_remove();
 
     const QFileInfoList&    get_scan_list();
 

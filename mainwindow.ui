@@ -173,6 +173,19 @@
      <number>0</number>
     </property>
    </widget>
+   <widget class="QPushButton" name="removeButton">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>130</y>
+      <width>161</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>remove</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

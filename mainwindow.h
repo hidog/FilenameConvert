@@ -30,6 +30,7 @@ public slots:
     void    rename_slot();
     void    finish_worker_slot();
     void    full_path_slot( int state );
+    void    remove_slot();
 
 private:
     Ui::MainWindow  *ui;

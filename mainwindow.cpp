@@ -34,12 +34,42 @@ void    MainWindow::init()
     connect(    ui->selectDstButton,        &QPushButton::clicked,          this,               &MainWindow::selet_dst_slot         );
     connect(    ui->scanButton,             &QPushButton::clicked,          this,               &MainWindow::scan_slot              );
     connect(    ui->renameButton,           &QPushButton::clicked,          this,               &MainWindow::rename_slot            );
+    connect(    ui->removeButton,           &QPushButton::clicked,          this,               &MainWindow::remove_slot            );
+
     connect(    &worker,                    &Worker::finished,              this,               &MainWindow::finish_worker_slot     );
     connect(    &worker,                    &Worker::message_sig,           ui->messageEdit,    &QLineEdit::setText                 );
     connect(    ui->fullNameCheckBox,       &QCheckBox::stateChanged,       this,               &MainWindow::full_path_slot         );
     connect(    &worker,                    &Worker::progress_init_sig,     ui->progressBar,    &QProgressBar::setRange             );
     connect(    &worker,                    &Worker::progress_sig,          ui->progressBar,    &QProgressBar::setValue             );
 }
+
+
+
+
+
+
+void    MainWindow::remove_slot()
+{
+    lock_button(true);
+
+    bool    result  =   false;
+
+    if( setting.src.isEmpty() )
+        QMessageBox::warning( nullptr, "Setting", "src is empty", QMessageBox::Ok, QMessageBox::Ok );
+    else if( QDir(setting.src).exists() == false )
+        QMessageBox::warning( nullptr, "Setting", "src is not exist", QMessageBox::Ok, QMessageBox::Ok );
+    else
+    {
+        result  =   true;
+        worker.set_mode( Mode::REMOVE );
+        worker.set_src( setting.src );
+        worker.start();
+    }
+
+    if( result == false )
+        lock_button(false);
+}
+
 
 
 
@@ -185,6 +215,8 @@ void    MainWindow::finish_worker_slot()
             ui->itemBrowser->setText( file_str );
     }
     else if( worker.get_mode() == Mode::RENAME )
+    {}
+    else if( worker.get_mode() == Mode::REMOVE )
     {}
     else
         assert(false);

@@ -15,63 +15,166 @@ void    Worker::run()
     switch( mode )
     {
     case Mode::SCAN:
-        if( src.isEmpty() == true )
-        {
-            qDebug() << "src is empty.";
-            assert(false);
-        }
-        else
-        {
-            scan_list.clear();
-            scan_folder( src );        
-        }
+        handle_scan();
         break;
     case Mode::RENAME :
-        if( src.isEmpty() == true || dst.isEmpty() == true )
-        {
-            qDebug() << "src or dst is empty.";
-            assert(false);
-        }
-        else        
-        {
-            //rename_file     =   std::bind( &Worker::rename_file_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-            //rename_folder   =   std::bind( &Worker::rename_folder_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-
-            //rename_file     =   std::bind( &Worker::rename_file_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-            //rename_folder   =   std::bind( &Worker::rename_folder_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-            
-            rename_file     =   std::bind( &Worker::rename_file_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );           
-            rename_folder   =   std::bind( &Worker::rename_folder_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-
-            try {
-                assert( conv == nullptr );
-                emit progress_init_sig( 0, scan_list.size() );
-
-                conv            =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
-                //codec         =   QTextCodec::codecForName("Big5");
-                solved_count    =   0;
-
-                rename( src, dst );
-
-                delete conv;
-                conv    =   nullptr;
-
-                //qDebug() << "solved_count = " << solved_count;
-                emit message_sig( QString("rename finish. solve %1 files.").arg(solved_count) );
-
-            } catch( std::exception err ) {
-                qDebug() << err.what();
-                delete conv;
-                conv    =   nullptr;
-                assert(false);
-            }
-        }
-        
+        handle_rename();        
+        break;
+    case Mode::REMOVE :
+        handle_remove();
         break;
     default:
         assert(false);
     }
 }
+
+
+
+void    Worker::handle_remove()
+{
+    if( src.isEmpty() == true )
+    {
+        qDebug() << "src is empty.";
+        assert(false);
+    }
+    else
+    {
+        remove( src );    
+        emit message_sig( QString("finish remove.") );
+
+    }
+}
+
+
+
+
+void    Worker::remove( QString path )
+{
+    // flac, log, m3u, jpg, cue, png, JPG
+    // cue, wav, jpg, log, torrent, rar, LOG, bmp, png, JPG, CUE, WAV, flac, txt, tak, PNG
+
+    QDir    dir(path);
+    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+
+    QFileInfoList   list   =   dir.entryInfoList();
+    QFileInfo       info;
+    bool            res;
+
+    int     i;
+    for( i = 0; i < list.size(); i++ )
+    {
+        info    =   list.at(i);
+        if( info.isFile() == true )
+        {
+            if( info.suffix() == QString("log") || 
+                info.suffix() == QString("jpg") ||
+                info.suffix() == QString("torrent") ||
+                info.suffix() == QString("rar") ||
+                info.suffix() == QString("bmp") ||
+                info.suffix() == QString("png") ||
+                info.suffix() == QString("txt") )
+            {
+                //qDebug() << info.absoluteFilePath();
+                emit message_sig( QString("rm file. %1").arg(info.absoluteFilePath()) );
+
+                QFile       file(info.absoluteFilePath());
+                /*QString     dst_path    =   QString("D:\\tmp\\%1").arg(info.fileName());
+                res     =   file.copy( dst_path );
+                if( res == false )
+                {
+                    qDebug() << "error " << info.absoluteFilePath();
+                    assert(false);
+                }*/
+                file.moveToTrash();
+            }
+        }
+        else if( info.isDir() == true )        
+            remove( info.absoluteFilePath() );
+    }
+
+    // remove folder if needed.
+    list    =   dir.entryInfoList();
+    if( list.size() == 0 )
+    {
+        QString name    =   dir.dirName();
+        dir.cdUp();
+        res =   dir.rmdir(name);
+        if( res == false )
+        {
+            qDebug() << "error " << path;
+            assert(false);
+        }
+
+        emit message_sig( QString("rm dir. %1").arg(path) );
+    }
+}
+
+
+
+
+
+
+void    Worker::handle_scan()
+{
+    if( src.isEmpty() == true )
+    {
+        qDebug() << "src is empty.";
+        assert(false);
+    }
+    else
+    {
+        scan_list.clear();
+        scan_folder( src );        
+    }
+}
+
+
+
+
+
+void    Worker::handle_rename()
+{
+    if( src.isEmpty() == true || dst.isEmpty() == true )
+    {
+        qDebug() << "src or dst is empty.";
+        assert(false);
+    }
+    else        
+    {
+        rename_file     =   std::bind( &Worker::rename_file_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
+        rename_folder   =   std::bind( &Worker::rename_folder_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
+
+        //rename_file     =   std::bind( &Worker::rename_file_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
+        //rename_folder   =   std::bind( &Worker::rename_folder_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
+
+        //rename_file     =   std::bind( &Worker::rename_file_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );           
+        //rename_folder   =   std::bind( &Worker::rename_folder_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
+
+        try {
+            assert( conv == nullptr );
+            emit progress_init_sig( 0, scan_list.size() );
+
+            conv            =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
+            //codec         =   QTextCodec::codecForName("Big5");
+            solved_count    =   0;
+
+            rename( src, dst );
+
+            delete conv;
+            conv    =   nullptr;
+
+            //qDebug() << "solved_count = " << solved_count;
+            emit message_sig( QString("rename finish. solve %1 files.").arg(solved_count) );
+
+        } catch( std::exception err ) {
+            qDebug() << err.what();
+            delete conv;
+            conv    =   nullptr;
+            assert(false);
+        }
+    }
+}
+
 
 
 
@@ -288,7 +391,7 @@ void    Worker::rename_file_remove_prefix( QFileInfo info, QDir dst_dir, QString
         flag        =   src_file.copy( dst_path );
         if( flag == false )
         {
-            qDebug() << "error";
+            qDebug() << "error   " << info.absoluteFilePath();
             assert(false);
         }
     }
@@ -322,7 +425,7 @@ void    Worker::rename_folder_remove_prefix( QFileInfo info, QDir dst_dir, QStri
     bool    flag   =   dst_dir.mkdir( dst_name );
     if( flag == false )
     {
-        qDebug() << "error";
+        qDebug() << "error   " << info.absolutePath();
         assert(false);
     }
     solved_count++;
