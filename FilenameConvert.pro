@@ -10,10 +10,8 @@ CONFIG += c++11
 
 
 # use for cmd
-win32 {
-    CONFIG += console
-    CONFIG -= app_bundle
-}
+CONFIG += console
+CONFIG -= app_bundle
 
 INCLUDEPATH += opencc/include
 

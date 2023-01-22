@@ -297,7 +297,7 @@ void    Worker::rename( QString src, QString dst )
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
     
         dst_name    =   utf8_tc_str.c_str();
-        //qDebug() << "dst_name = " << dst_name;    
+        qDebug() << "dst_name = " << dst_name;    
 
         if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
