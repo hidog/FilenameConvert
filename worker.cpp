@@ -285,19 +285,26 @@ void    Worker::rename( QString src, QString dst )
     QString         dst_path, dst_name;
     
     bool    flag;
+    char    buf1[300], buf2[300], buf3[300];
     
+    FILE    *fp =   fopen( "G:\\2\\convert.bat", "w+" );
+
     //
     //for( auto& info : list )
     for( int i = 0; i < list.size(); i++ )
     {
         auto info = list.at(i);
         auto qstr = info.fileName();
-        //qstr.remove( QChar(' ') );
+        qstr.remove( 0, 4 );
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-    
-        dst_name    =   utf8_tc_str.c_str();
-        qDebug() << "dst_name = " << dst_name;    
+        sscanf( utf8_tc_str.c_str(), "%[^(](%[^)])%s", buf1, buf2, buf3 );
+        qDebug() << buf1 << " " << buf2 << " " << buf3;
+
+        dst_name    =   QString("%1%2").arg(buf1).arg(buf3);
+        qDebug() << "dst_name = " << dst_name;
+
+        fprintf( fp, "ffmpeg -i \"%s%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 27 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s%s\"\n", buf1, buf3, buf1, buf3 );
 
         if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
@@ -306,6 +313,8 @@ void    Worker::rename( QString src, QString dst )
         else
             assert(false);
     }
+
+    fclose(fp);
 }
 
 
