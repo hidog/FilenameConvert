@@ -304,7 +304,7 @@ void    Worker::rename( QString src, QString dst )
         dst_name    =   QString("%1%2").arg(buf1).arg(buf3);
         qDebug() << "dst_name = " << dst_name;
 
-        fprintf( fp, "ffmpeg -i \"%s%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 27 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s%s\"\n", buf1, buf3, buf1, buf3 );
+        fprintf( fp, "ffmpeg -i \"%s%s\" -vcodec hevc_nvenc -cq 27 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s%s\"\n", buf1, buf3, buf1, buf3 );
 
         if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
