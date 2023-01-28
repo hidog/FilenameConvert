@@ -297,11 +297,10 @@ void    Worker::rename( QString src, QString dst )
         auto qstr = info.fileName();
         //qstr.remove( 0, 4 );
     
-        utf8_tc_str =   conv->Convert( qstr.toStdString().c_str() );
-        dst_name    =   utf8_tc_str.c_str();
-        qDebug() << "dst_name = " << dst_name;
+        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
+        std::string name = utf8_tc_str.substr( 0, utf8_tc_str.size()-4 );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -vcodec copy -acodec copy \"./output/%s\"\n", utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s.sup\" -vcodec hevc_nvenc -cq 27 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", utf8_tc_str.c_str(), name.c_str(), utf8_tc_str.c_str() );
 
         /*if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
