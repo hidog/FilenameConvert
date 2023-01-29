@@ -300,7 +300,7 @@ void    Worker::rename( QString src, QString dst )
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         std::string name = utf8_tc_str.substr( 0, utf8_tc_str.size()-4 );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s.sup\" -vcodec hevc_nvenc -cq 27 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", utf8_tc_str.c_str(), name.c_str(), utf8_tc_str.c_str() );
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s.ass\" -vcodec hevc_nvenc -cq 25 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", utf8_tc_str.c_str(), name.c_str(), utf8_tc_str.c_str() );
 
         /*if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
