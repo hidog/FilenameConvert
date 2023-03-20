@@ -298,10 +298,10 @@ void    Worker::rename( QString src, QString dst )
         //qstr.remove( 0, 4 );
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        sscanf( utf8_tc_str.c_str(), "%[^(](%[^)]%s", buf1, buf2, buf3 );
+        //sscanf( utf8_tc_str.c_str(), "%[^(](%[^)]%s", buf1, buf2, buf3 );
 
-        fprintf( fp, "ffmpeg -i \"%s(%s).mkv\" -i \"%s(%s).ass\" -vcodec hevc_nvenc -cq 27 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s.mkv\"\n", 
-            buf1, buf2, buf1, buf2, buf1 );
+        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 27 -acodec copy \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_tc_str.c_str() );
 
         /*if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
