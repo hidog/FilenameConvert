@@ -300,8 +300,10 @@ void    Worker::rename( QString src, QString dst )
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         //sscanf( utf8_tc_str.c_str(), "%[^(](%[^)]%s", buf1, buf2, buf3 );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 27 -acodec copy \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 25 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+
+               
 
         /*if( info.isFile() == true )        
             rename_file( info, dst_dir, dst_name );        
