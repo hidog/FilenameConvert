@@ -280,7 +280,7 @@ void    Worker::rename( QString src, QString dst )
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   src_dir.entryInfoList();
     
-    std::string     utf8_tc_str, utf8_sub_str;  // tc = tradition chinese
+    std::string     utf8_tc_str;//, utf8_sub_str;  // tc = tradition chinese
     //std::string     big5_str;
     QString         dst_path, dst_name;
     
@@ -291,21 +291,21 @@ void    Worker::rename( QString src, QString dst )
 
     //
     //for( auto& info : list )
-    for( int i = 0; i < list.size(); i += 2 )
+    for( int i = 0; i < list.size(); i++ )
     {
-        auto info = list.at(i+1);
-        auto sub = list.at(i);
+        auto info = list.at(i);
+        //auto sub = list.at(i);
         auto qstr = info.fileName();
-        auto sub_str = sub.fileName();
+        //auto sub_str = sub.fileName();
         //qstr.remove( 0, 4 );
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
+        //utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
 
         //sscanf( utf8_tc_str.c_str(), "%[^(](%[^)]%s", buf1, buf2, buf3 );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
+        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 25 -acodec copy \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_tc_str.c_str() );
 
                
 
