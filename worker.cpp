@@ -269,56 +269,64 @@ Mode    Worker::get_mode()
 
 
 
-
+#if 0 // load sub
 void    Worker::rename( QString src, QString dst )
 {
-    //qDebug() << "src = " << src << "\ndst = " << dst << "\n";
-    
     QDir    src_dir(src);
     QDir    dst_dir(dst);       
     
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   src_dir.entryInfoList();
     
-    std::string     utf8_tc_str;//, utf8_sub_str;  // tc = tradition chinese
-    //std::string     big5_str;
-    QString         dst_path, dst_name;
-    
-    bool    flag;
-    char    buf1[300], buf2[300], buf3[300];
+    std::string     utf8_tc_str, utf8_sub_str;
     
     FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
 
     //
     //for( auto& info : list )
-    for( int i = 0; i < list.size(); i++ )
+    for( int i = 0; i < list.size(); i += 2 )
     {
-        auto info = list.at(i);
-        //auto sub = list.at(i);
+        auto info = list.at(i+1);  // sometimes need exchange with sub
         auto qstr = info.fileName();
-        //auto sub_str = sub.fileName();
-        //qstr.remove( 0, 4 );
+
+        auto sub = list.at(i);
+        auto sub_str = sub.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        //utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
+        utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
 
-        //sscanf( utf8_tc_str.c_str(), "%[^(](%[^)]%s", buf1, buf2, buf3 );
-
-        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 25 -acodec copy \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-
-               
-
-        /*if( info.isFile() == true )        
-            rename_file( info, dst_dir, dst_name );        
-        else if( info.isDir() == true )
-            rename_folder( info, dst_dir, dst_name );
-        else
-            assert(false);*/
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
     }
 
     fclose(fp);
 }
+#elif 1  // single file, simple convert.
+void    Worker::rename( QString src, QString dst )
+{
+    QDir    src_dir(src);
+    QDir    dst_dir(dst);       
+    
+    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+    QFileInfoList   list    =   src_dir.entryInfoList();
+    
+    std::string     utf8_tc_str;
+    
+    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
+
+    //
+    for( auto& info : list )
+    {
+        auto qstr = info.fileName();
+    
+        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
+        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 26 -acodec copy \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+    }
+
+    fclose(fp);
+}
+#endif
 
 
 void    Worker::rename_file_remove_full( QFileInfo info, QDir dst_dir, QString dst_name )
