@@ -126,7 +126,7 @@ void    MainWindow::full_path_slot( int state )
 
 void    MainWindow::selet_src_slot()
 {
-    QString dir     =   QFileDialog::getExistingDirectory( this, tr("select src dir"), "D:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+    QString dir     =   QFileDialog::getExistingDirectory( this, tr("select src dir"), "G:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
     setting.src     =   dir;
     ui->srcEdit->setText( setting.src );
 }
@@ -136,7 +136,7 @@ void    MainWindow::selet_src_slot()
 
 void    MainWindow::selet_dst_slot()
 {
-    QString dir     =   QFileDialog::getExistingDirectory( this, tr("select dst dir"), "D:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+    QString dir     =   QFileDialog::getExistingDirectory( this, tr("select dst dir"), "G:\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
     setting.dst     =   dir;
     ui->dstEdit->setText( setting.dst );
 }
