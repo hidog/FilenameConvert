@@ -286,16 +286,16 @@ void    Worker::rename( QString src, QString dst )
     //for( auto& info : list )
     for( int i = 0; i < list.size(); i += 2 )
     {
-        auto info = list.at(i);  // sometimes need exchange with sub
+        auto info = list.at(i + 1);  // sometimes need exchange with sub
         auto qstr = info.fileName();
 
-        auto sub = list.at(i+1);
+        auto sub = list.at(i);
         auto sub_str = sub.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 16 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 27 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
     }
 
