@@ -269,7 +269,7 @@ Mode    Worker::get_mode()
 
 
 
-#if 1 // load sub
+#if 0 // load sub
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);
@@ -286,17 +286,42 @@ void    Worker::rename( QString src, QString dst )
     //for( auto& info : list )
     for( int i = 0; i < list.size(); i += 2 )
     {
-        auto info = list.at(i + 1);  // sometimes need exchange with sub
+        auto info = list.at(i);  // sometimes need exchange with sub
         auto qstr = info.fileName();
 
-        auto sub = list.at(i);
+        auto sub = list.at(i + 1);
         auto sub_str = sub.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 27 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
+    }
+
+    fclose(fp);
+}
+#elif 1  // single file, with sub track.
+void    Worker::rename( QString src, QString dst )
+{
+    QDir    src_dir(src);
+    QDir    dst_dir(dst);       
+    
+    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+    QFileInfoList   list    =   src_dir.entryInfoList();
+    
+    std::string     utf8_tc_str;
+    
+    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
+
+    //
+    for( auto& info : list )
+    {
+        auto qstr = info.fileName();
+    
+        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 25 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 
     fclose(fp);
