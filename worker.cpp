@@ -295,7 +295,7 @@ void    Worker::rename( QString src, QString dst )
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
 
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 30 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 18 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
     }
 
