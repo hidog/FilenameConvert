@@ -278,7 +278,7 @@ void    Worker::rename( QString src, QString dst )
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   src_dir.entryInfoList();
     
-    std::string     utf8_tc_str, utf8_sub_str;
+    std::string     utf8_tc_str, utf8_sub_str, output_str;
     
     FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
 
@@ -286,26 +286,27 @@ void    Worker::rename( QString src, QString dst )
     //for( auto& info : list )
     for( int i = 0; i < list.size(); i += 2 )
     {
-        auto info = list.at(i + 1);  // sometimes need exchange with sub
+        auto info = list.at(i + 0);  // sometimes need exchange with sub
         auto qstr = info.fileName();
 
-        auto sub = list.at(i);
+        auto sub = list.at(i + 1);
         auto sub_str = sub.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
+        output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
         // 10 bit
-        /*fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 22 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );*/
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
         // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 22 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
+        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+          //       utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
     }
 
     fclose(fp);
 }
-#elif 0 // load sub, not intersperse
+#elif 1 // load sub, not intersperse
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);
@@ -314,15 +315,16 @@ void    Worker::rename( QString src, QString dst )
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   src_dir.entryInfoList();
     
-    std::string     utf8_tc_str, utf8_sub_str;
+    std::string     utf8_tc_str, utf8_sub_str, output_str;
     
     FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
 
     //
+    int     offset  =   list.size()/2;
     //for( auto& info : list )
     for( int i = 0; i < list.size()/2; i++ )
     {
-        auto info = list.at(i + 24);  // sometimes need exchange with sub
+        auto info = list.at(i + offset);  // sometimes need exchange with sub
         auto qstr = info.fileName();
 
         auto sub = list.at(i);
@@ -330,14 +332,19 @@ void    Worker::rename( QString src, QString dst )
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
+        output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 28 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
+        // 10 bit
+        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+          //  utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
+        // 8 bit
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+            utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
     }
 
     fclose(fp);
 }
-#elif 1  // single file, with sub track.
+#elif 0  // single file, with sub track.
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);
@@ -356,8 +363,12 @@ void    Worker::rename( QString src, QString dst )
         auto qstr = info.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:2 -map 0:6 -vcodec hevc_nvenc -cq 22 -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+        // 10 bit
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+                utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+        // 8 bit
+        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:2 -vcodec hevc_nvenc -cq 30 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        //         utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 
     fclose(fp);
@@ -381,7 +392,7 @@ void    Worker::rename( QString src, QString dst )
         auto qstr = info.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 26 -acodec copy \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 30 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 
