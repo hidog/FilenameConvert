@@ -269,6 +269,15 @@ Mode    Worker::get_mode()
 
 
 
+QString     Worker::remove_full_font( QString input )
+{
+    input.remove( 0, 7 );
+    return  input;
+}
+
+
+
+
 #if 1    // load sub
 void    Worker::rename( QString src, QString dst )
 {
@@ -297,11 +306,11 @@ void    Worker::rename( QString src, QString dst )
         output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-                    utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
-        // 8 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
           //          utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
+        // 8 bit
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+                    utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
     }
 
     fclose(fp);
@@ -338,7 +347,7 @@ void    Worker::rename( QString src, QString dst )
         //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
           //  utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
     }
 
@@ -364,10 +373,10 @@ void    Worker::rename( QString src, QString dst )
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:2 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:4 -map 0:6 -map 0:8 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
                    utf8_tc_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:2 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
           //       utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 
@@ -396,7 +405,7 @@ void    Worker::rename( QString src, QString dst )
         //fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy \"./output/%s\"\n", 
           //          utf8_tc_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:2 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
                     utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 

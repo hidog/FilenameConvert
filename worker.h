@@ -60,6 +60,8 @@ public:
     void    handle_remove();
     void    handle_convert();
 
+    QString    remove_full_font( QString input );
+
     const QFileInfoList&    get_scan_list();
 
 signals:
