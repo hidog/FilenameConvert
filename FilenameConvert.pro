@@ -13,13 +13,6 @@ CONFIG += c++11
 CONFIG += console
 CONFIG -= app_bundle
 
-INCLUDEPATH += opencc/include
-
-Debug:LIBPATH += opencc/lib/debug
-Release:LIBPATH += opencc/lib/release
-
-LIBS += -lopencc
-
 SOURCES += \
     main.cpp \
     mainwindow.cpp \

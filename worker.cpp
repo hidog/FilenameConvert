@@ -4,7 +4,6 @@
 #include <QDir>
 #include <cassert>
 
-#include <opencc/opencc.h>
 #include <QTextCodec>
 
 
@@ -43,16 +42,7 @@ void    Worker::handle_convert()
         assert(false);
     }
     else
-    {
-        codec   =   QTextCodec::codecForName("Big5");
-        conv    =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
-
-        convert( src );    
-        emit message_sig( QString("finish convert.") );
-
-        delete conv;
-        conv    =   nullptr;
-    }
+    {}
 }
 
 
@@ -82,6 +72,9 @@ void    Worker::convert( QString path )
     QDir    dir(path);
     dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
 
+    printf("path = %s", path.toStdString().c_str() );
+
+#if 0
     QFileInfoList   list   =   dir.entryInfoList();
     QFileInfo       info;
     bool            res;
@@ -128,6 +121,7 @@ void    Worker::convert( QString path )
             convert( info.absoluteFilePath() );
         }
     }
+#endif
 }
 
 
@@ -214,47 +208,6 @@ void    Worker::handle_scan()
 
 void    Worker::handle_rename()
 {
-    if( src.isEmpty() == true || dst.isEmpty() == true )
-    {
-        qDebug() << "src or dst is empty.";
-        assert(false);
-    }
-    else        
-    {
-        // 基本的轉換檔名
-        rename_file     =   std::bind( &Worker::rename_file_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-        rename_folder   =   std::bind( &Worker::rename_folder_basic, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-
-        // 移除全形英文
-        //rename_file     =   std::bind( &Worker::rename_file_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-        //rename_folder   =   std::bind( &Worker::rename_folder_remove_full, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-
-        // 某個檔案會用檔名的方式區別動畫名稱跟曲名, 這個會將動畫名稱新建資料夾
-        //rename_file     =   std::bind( &Worker::rename_file_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );           
-        //rename_folder   =   std::bind( &Worker::rename_folder_remove_prefix, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-
-        try {
-            assert( conv == nullptr );
-            emit progress_init_sig( 0, scan_list.size() );
-
-            conv            =   new opencc::SimpleConverter( OPENCC_DEFAULT_CONFIG_SIMP_TO_TRAD );
-            solved_count    =   0;
-
-            rename( src, dst );
-
-            delete conv;
-            conv    =   nullptr;
-
-            //qDebug() << "solved_count = " << solved_count;
-            emit message_sig( QString("rename finish. solve %1 files.").arg(solved_count) );
-
-        } catch( std::exception err ) {
-            qDebug() << err.what();
-            delete conv;
-            conv    =   nullptr;
-            assert(false);
-        }
-    }
 }
 
 
@@ -277,25 +230,7 @@ QString     Worker::remove_full_font( QString input )
 
 
 
-#if 0       // remove full font
-void    Worker::rename( QString src, QString dst )
-{
-    QDir    src_dir(src);     
-    
-    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-    QFileInfoList   list    =   src_dir.entryInfoList();
 
-    //
-    //for( auto& info : list )
-    for( int i = 0; i < list.size(); i++ )
-    {
-        auto info   =   list.at(i);
-        auto fn     =   remove_full_font(info.fileName());
-        QFile file(info.absoluteFilePath());
-        file.rename( info.absolutePath() + "\\" + fn);
-    }
-}
-#elif 0    // load sub
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);     
@@ -303,131 +238,9 @@ void    Worker::rename( QString src, QString dst )
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   src_dir.entryInfoList();
     
-    std::string     utf8_tc_str, utf8_sub_str, output_str;
-    
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
 
-    //
-    //for( auto& info : list )
-    for( int i = 0; i < list.size(); i += 2 )
-    {
-        auto info = list.at(i + 1);  // sometimes need exchange with sub
-        auto qstr = info.fileName();
-
-        auto sub = list.at(i + 0);
-        auto sub_str = sub.fileName();
-    
-        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
-        output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
-
-        // 10 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-          //          utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
-        // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:1 -map 0:0 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-                    utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
-    }
-
-    fclose(fp);
 }
-#elif 0 // load sub, not intersperse
-void    Worker::rename( QString src, QString dst )
-{
-    QDir    src_dir(src);
-    QDir    dst_dir(dst);       
-    
-    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-    QFileInfoList   list    =   src_dir.entryInfoList();
-    
-    std::string     utf8_tc_str, utf8_sub_str, output_str;
-    
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
 
-    //
-    int     offset  =   list.size()/2;
-    //for( auto& info : list )
-    for( int i = 0; i < list.size()/2; i++ )
-    {
-        auto info = list.at(i + offset);  // sometimes need exchange with sub
-        auto qstr = info.fileName();
-
-        auto sub = list.at(i);
-        auto sub_str = sub.fileName();
-    
-        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        utf8_sub_str    =   conv->Convert( sub_str.toStdString().c_str() );
-        output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
-
-        // 10 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-          //  utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
-        // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-            utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
-    }
-
-    fclose(fp);
-}
-#elif 1  // single file, with sub track.
-void    Worker::rename( QString src, QString dst )
-{
-    QDir    src_dir(src);
-    QDir    dst_dir(dst);       
-    
-    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-    QFileInfoList   list    =   src_dir.entryInfoList();
-    
-    std::string     utf8_tc_str;
-    
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
-
-    //
-    for( auto& info : list )
-    {
-        auto qstr = info.fileName();
-    
-        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        // 10 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:4 -map 0:6 -map 0:8 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-          //         utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-        // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
-                 utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-    }
-
-    fclose(fp);
-}
-#else  // single file, simple convert.
-void    Worker::rename( QString src, QString dst )
-{
-    QDir    src_dir(src);
-    QDir    dst_dir(dst);       
-    
-    src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-    QFileInfoList   list    =   src_dir.entryInfoList();
-    
-    std::string     utf8_tc_str;
-    
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
-
-    //
-    for( auto& info : list )
-    {
-        auto qstr = info.fileName();
-    
-        utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        // 10 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -vcodec hevc_nvenc -cq 25 -pix_fmt p010le -acodec copy \"./output/%s\"\n", 
-          //          utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-        // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:2 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
-                    utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-    }
-
-    fclose(fp);
-}
-#endif
 
 
 void    Worker::rename_file_remove_full( QFileInfo info, QDir dst_dir, QString dst_name )
