@@ -131,56 +131,7 @@ void    Worker::convert( QString path )
 
 void    Worker::remove( QString path )
 {
-    // flac, log, m3u, jpg, cue, png, JPG
-    // cue, wav, jpg, log, torrent, rar, LOG, bmp, png, JPG, CUE, WAV, flac, txt, tak, PNG
-
-    QDir    dir(path);
-    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-
-    QFileInfoList   list   =   dir.entryInfoList();
-    QFileInfo       info;
-    bool            res;
-
-    int     i;
-    for( i = 0; i < list.size(); i++ )
-    {
-        info    =   list.at(i);
-        if( info.isFile() == true )
-        {
-            if( info.suffix() == QString("log") || 
-                info.suffix() == QString("jpg") ||
-                info.suffix() == QString("torrent") ||
-                info.suffix() == QString("rar") ||
-                info.suffix() == QString("bmp") ||
-                info.suffix() == QString("png") ||
-                info.suffix() == QString("txt") )
-            {
-                //qDebug() << info.absoluteFilePath();
-                emit message_sig( QString("rm file. %1").arg(info.absoluteFilePath()) );
-
-                QFile       file(info.absoluteFilePath());
-                file.moveToTrash();
-            }
-        }
-        else if( info.isDir() == true )        
-            remove( info.absoluteFilePath() );
-    }
-
-    // remove folder if needed.
-    list    =   dir.entryInfoList();
-    if( list.size() == 0 )
-    {
-        QString name    =   dir.dirName();
-        dir.cdUp();
-        res =   dir.rmdir(name);
-        if( res == false )
-        {
-            qDebug() << "error " << path;
-            assert(false);
-        }
-
-        emit message_sig( QString("rm dir. %1").arg(path) );
-    }
+    return;
 }
 
 
@@ -197,8 +148,16 @@ void    Worker::handle_scan()
     }
     else
     {
+#ifdef WIN32
+        fp = fopen("D:\\test.sh", "w+");
+#else
+#error not define
+#endif
+
         scan_list.clear();
-        scan_folder( src );        
+        scan_folder( src );
+
+        fclose(fp);
     }
 }
 
@@ -208,6 +167,15 @@ void    Worker::handle_scan()
 
 void    Worker::handle_rename()
 {
+    if( src.isEmpty() == true || dst.isEmpty() == true )
+    {
+        qDebug() << "src or dst is empty.";
+        assert(false);
+    }
+    else        
+    {
+        rename( src, dst );
+    }
 }
 
 
@@ -238,6 +206,13 @@ void    Worker::rename( QString src, QString dst )
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   src_dir.entryInfoList();
     
+    int         i;
+    QFileInfo   info;
+    for( i = 0; i < list.size(); i++ )
+    {
+        info = list.at(i);
+        qDebug() << info.absolutePath();
+    }
 
 }
 
@@ -509,17 +484,49 @@ void    Worker::set_mode( Mode m )
 
 void    Worker::scan_folder( QString path )
 {
-    QDir    dir(path);
+    qDebug() << path;
+    QDir        dir(path);
+    QString     new_filename;
 
-    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
+    dir.setFilter( QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot );
     QFileInfoList   list    =   dir.entryInfoList();
 
     for( auto& info : list )
     {
-        emit message_sig( QString("scan item %1").arg(info.fileName()) );
+        if( info.isFile() == true )
+        {
+            if( info.suffix().compare("mp3", Qt::CaseInsensitive) == 0 )
+            {
+                // do nothing
+                qDebug() << info.absoluteFilePath();
+            }
+            else if( info.suffix().compare("flac", Qt::CaseInsensitive) == 0 )
+            {
+                qDebug() << info.fileName();
 
-        scan_list.push_back(info);
-        scan_folder( info.absoluteFilePath() );
+                new_filename    =   info.absoluteFilePath();
+                new_filename.remove( info.absoluteFilePath().size() - 4, 4 );
+                new_filename += "mp3";
+                qDebug() << new_filename;
+
+                QFile   file(new_filename);
+                if( file.exists() == true )
+                    qDebug() << "repeat";
+
+                fprintf(fp, "ffmpeg -i \"%s\" -ab 320k -ar 44100 -map_metadata 0 -d3v2_version 3 -write_id3v1 1 \"%s\"\n", 
+                    info.absoluteFilePath().toStdString().c_str(), new_filename.toStdString().c_str() );
+                fprintf(fp, "rm \"%s\"\n", info.absoluteFilePath().toStdString().c_str() );
+            }
+            else
+            {
+                qDebug() << info.absoluteFilePath();
+                fprintf(fp, "rm \"%s\"\n", info.absoluteFilePath().toStdString().c_str() );
+            }
+        }
+        else if( info.isDir() == true )
+        {
+            scan_folder( info.absoluteFilePath() );
+        }
     }
 }
 

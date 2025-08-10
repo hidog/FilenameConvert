@@ -6,6 +6,7 @@
 #include <QDir>
 #include <string>
 #include <functional>
+#include <stdlib.h>
 
 
 
@@ -63,6 +64,7 @@ public:
     QString    remove_full_font( QString input );
 
     const QFileInfoList&    get_scan_list();
+    bool    compare_no_case();
 
 signals:
     void    message_sig( QString );
@@ -90,6 +92,8 @@ private:
 
     opencc::SimpleConverter   *conv     =   nullptr;
     QTextCodec                *codec    =   nullptr;
+
+    FILE *fp = NULL;
 
 };
 
