@@ -73,55 +73,6 @@ void    Worker::convert( QString path )
     dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
 
     printf("path = %s", path.toStdString().c_str() );
-
-#if 0
-    QFileInfoList   list   =   dir.entryInfoList();
-    QFileInfo       info;
-    bool            res;
-    std::string     big5_str,   str;
-
-
-    int     i;
-    for( i = 0; i < list.size(); i++ )
-    {
-        info    =   list.at(i);
-        if( info.suffix() == QString("cue") )
-        {
-            QFile       file( info.absoluteFilePath() );
-            QString     output;
-
-            if( file.open( QIODevice::ReadWrite | QIODevice::Text ) == false )
-            {
-                qDebug() << "error !!";
-                assert(false);
-            }
-            else
-            {
-                emit message_sig( QString("convert file. %1").arg(info.absoluteFilePath()) );
-
-                while( file.atEnd() == false )
-                {
-                    QString line    =   file.readLine();
-                    big5_str        =   conv->Convert( line.toStdString() );
-                    str             =   codec->fromUnicode( QString("%1").arg(big5_str.c_str()) );
-                    output          +=  QString( "%1" ).arg(big5_str.c_str());
-                }
-                
-                file.remove();
-                file.close();
-                QFile   file2( info.absoluteFilePath() );
-                file2.open( QIODevice::ReadWrite | QIODevice::Text );
-                QTextStream out(&file2);
-                out << output;
-                file2.close();
-            }
-        }
-        else if( info.isDir() == true )
-        {
-            convert( info.absoluteFilePath() );
-        }
-    }
-#endif
 }
 
 
@@ -151,7 +102,7 @@ void    Worker::handle_scan()
 #ifdef WIN32
         fp = fopen("D:\\test.sh", "w+");
 #else
-#error not define
+        fp = fopen("/home/hidog/Music/test.sh", "w+");
 #endif
 
         scan_list.clear();
@@ -513,7 +464,7 @@ void    Worker::scan_folder( QString path )
                 if( file.exists() == true )
                     qDebug() << "repeat";
 
-                fprintf(fp, "ffmpeg -i \"%s\" -ab 320k -ar 44100 -map_metadata 0 -d3v2_version 3 -write_id3v1 1 \"%s\"\n", 
+                fprintf(fp, "ffmpeg -i \"%s\" -ab 320k -ar 44100 -map_metadata 0 -id3v2_version 3 -write_id3v1 1 \"%s\"\n",
                     info.absoluteFilePath().toStdString().c_str(), new_filename.toStdString().c_str() );
                 fprintf(fp, "rm \"%s\"\n", info.absoluteFilePath().toStdString().c_str() );
             }
