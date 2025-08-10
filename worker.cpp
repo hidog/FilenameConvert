@@ -137,56 +137,7 @@ void    Worker::convert( QString path )
 
 void    Worker::remove( QString path )
 {
-    // flac, log, m3u, jpg, cue, png, JPG
-    // cue, wav, jpg, log, torrent, rar, LOG, bmp, png, JPG, CUE, WAV, flac, txt, tak, PNG
-
-    QDir    dir(path);
-    dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
-
-    QFileInfoList   list   =   dir.entryInfoList();
-    QFileInfo       info;
-    bool            res;
-
-    int     i;
-    for( i = 0; i < list.size(); i++ )
-    {
-        info    =   list.at(i);
-        if( info.isFile() == true )
-        {
-            if( info.suffix() == QString("log") || 
-                info.suffix() == QString("jpg") ||
-                info.suffix() == QString("torrent") ||
-                info.suffix() == QString("rar") ||
-                info.suffix() == QString("bmp") ||
-                info.suffix() == QString("png") ||
-                info.suffix() == QString("txt") )
-            {
-                //qDebug() << info.absoluteFilePath();
-                emit message_sig( QString("rm file. %1").arg(info.absoluteFilePath()) );
-
-                QFile       file(info.absoluteFilePath());
-                file.moveToTrash();
-            }
-        }
-        else if( info.isDir() == true )        
-            remove( info.absoluteFilePath() );
-    }
-
-    // remove folder if needed.
-    list    =   dir.entryInfoList();
-    if( list.size() == 0 )
-    {
-        QString name    =   dir.dirName();
-        dir.cdUp();
-        res =   dir.rmdir(name);
-        if( res == false )
-        {
-            qDebug() << "error " << path;
-            assert(false);
-        }
-
-        emit message_sig( QString("rm dir. %1").arg(path) );
-    }
+    printf("do nothing");
 }
 
 
