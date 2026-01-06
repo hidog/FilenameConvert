@@ -228,7 +228,7 @@ QString     Worker::remove_full_font( QString input )
 
 
 
-#if 1       // load sub
+#if 0       // load sub
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);     
@@ -238,7 +238,8 @@ void    Worker::rename( QString src, QString dst )
     
     std::string     utf8_tc_str, utf8_sub_str, output_str;
     
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
+    std::string     cvt_path = dst.toStdString() + std::string("\\convert.bat");
+    FILE    *fp =   fopen( cvt_path.c_str(), "w+" );
 
     //
     //for( auto& info : list )
@@ -255,7 +256,7 @@ void    Worker::rename( QString src, QString dst )
         output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 29 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
                     utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
         // 8 bit
         //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
@@ -275,17 +276,18 @@ void    Worker::rename( QString src, QString dst )
     
     std::string     utf8_tc_str, utf8_sub_str, output_str;
     
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
+    std::string     cvt_path = dst.toStdString() + std::string("\\convert.bat");
+    FILE    *fp =   fopen( cvt_path.c_str(), "w+" );
 
     //
     int     offset  =   list.size()/2;
     //for( auto& info : list )
     for( int i = 0; i < list.size()/2; i++ )
     {
-        auto info = list.at(i);  // sometimes need exchange with sub
+        auto info = list.at(i + offset);  // sometimes need exchange with sub
         auto qstr = info.fileName();
 
-        auto sub = list.at(i + offset);
+        auto sub = list.at(i + 0);
         auto sub_str = sub.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
@@ -293,7 +295,7 @@ void    Worker::rename( QString src, QString dst )
         output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:2 -map 1:0 -vcodec hevc_nvenc -cq 29 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 29 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
         //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 26 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
@@ -313,7 +315,8 @@ void    Worker::rename( QString src, QString dst )
     
     std::string     utf8_tc_str;
     
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
+    std::string     cvt_path = dst.toStdString() + std::string("\\convert.bat");
+    FILE    *fp =   fopen( cvt_path.c_str(), "w+" );
 
     //
     for( auto& info : list )
@@ -321,8 +324,8 @@ void    Worker::rename( QString src, QString dst )
         auto qstr = info.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -map 0:4 -map 0:5 -map 0:6 -vcodec hevc_nvenc -cq 24 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        // 10 2
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 26 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
                    utf8_tc_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
         //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
@@ -331,7 +334,7 @@ void    Worker::rename( QString src, QString dst )
 
     fclose(fp);
 }
-#elif 0  // single file, simple convert.
+#elif 1  // single file, simple convert.
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);
@@ -341,8 +344,9 @@ void    Worker::rename( QString src, QString dst )
     QFileInfoList   list    =   src_dir.entryInfoList();
     
     std::string     utf8_tc_str;
-    
-    FILE    *fp =   fopen( "G:\\convert.bat", "w+" );
+
+    std::string     cvt_path = dst.toStdString() + std::string("\\convert.bat");
+    FILE    *fp =   fopen( cvt_path.c_str(), "w+" );
 
     //
     for( auto& info : list )
@@ -351,11 +355,11 @@ void    Worker::rename( QString src, QString dst )
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy \"./output/%s\"\n", 
-                    utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-        // 8 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -vcodec hevc_nvenc -cq 33 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
+        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:1 -map 0:0 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy \"./output/%s\"\n", 
           //          utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+        // 8 bit
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -vcodec hevc_nvenc -cq 33 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
+                    utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 
     fclose(fp);
@@ -363,6 +367,8 @@ void    Worker::rename( QString src, QString dst )
 #else    // remove full font word
 void    Worker::rename( QString src, QString dst )
 {
+    return;
+
     QDir    src_dir(src);     
     
     src_dir.setFilter( QDir::Dirs | QDir::Files | QDir::Hidden | QDir::NoDotAndDotDot );
