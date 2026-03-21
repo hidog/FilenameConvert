@@ -304,7 +304,7 @@ void    Worker::rename( QString src, QString dst )
 
     fclose(fp);
 }
-#elif 0  // single file, with sub track.
+#elif 1  // single file, with sub track.
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);
@@ -324,8 +324,8 @@ void    Worker::rename( QString src, QString dst )
         auto qstr = info.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
-        // 10 2
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 26 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        // 10 bit
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 20 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
                    utf8_tc_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
         //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -map 0:3 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
