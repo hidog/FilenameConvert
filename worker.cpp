@@ -228,7 +228,7 @@ QString     Worker::remove_full_font( QString input )
 
 
 
-#if 0       // load sub
+#if 1       // load sub
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);     
@@ -245,10 +245,10 @@ void    Worker::rename( QString src, QString dst )
     //for( auto& info : list )
     for( int i = 0; i < list.size(); i += 2 )
     {
-        auto info = list.at(i + 0);  // sometimes need exchange with sub
+        auto info = list.at(i + 1);  // sometimes need exchange with sub
         auto qstr = info.fileName();
 
-        auto sub = list.at(i + 1);
+        auto sub = list.at(i + 0);
         auto sub_str = sub.fileName();
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
@@ -256,7 +256,7 @@ void    Worker::rename( QString src, QString dst )
         output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 29 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 27 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
                     utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
         // 8 bit
         //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 24 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
@@ -295,10 +295,10 @@ void    Worker::rename( QString src, QString dst )
         output_str      =   utf8_tc_str.substr( 0, utf8_tc_str.size() - 4 ) + ".mkv";
 
         // 10 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 29 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 27 -pix_fmt p010le -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
             utf8_tc_str.c_str(), utf8_sub_str.c_str(), utf8_tc_str.c_str() );
         // 8 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 26 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
+        //fprintf( fp, "ffmpeg -i \"%s\" -i \"%s\" -map 0:0 -map 0:1 -map 1:0 -vcodec hevc_nvenc -cq 29 -pix_fmt yuv420p -acodec copy -scodec copy -disposition:s:0 default \"./output/%s\"\n", 
           //  utf8_tc_str.c_str(), utf8_sub_str.c_str(), output_str.c_str() );
     }
 
@@ -334,7 +334,7 @@ void    Worker::rename( QString src, QString dst )
 
     fclose(fp);
 }
-#elif 1  // single file, simple convert.
+#elif 0  // single file, simple convert.
 void    Worker::rename( QString src, QString dst )
 {
     QDir    src_dir(src);
@@ -355,11 +355,11 @@ void    Worker::rename( QString src, QString dst )
     
         utf8_tc_str     =   conv->Convert( qstr.toStdString().c_str() );
         // 10 bit
-        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:1 -map 0:0 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy \"./output/%s\"\n", 
-          //          utf8_tc_str.c_str(), utf8_tc_str.c_str() );
-        // 8 bit
-        fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -vcodec hevc_nvenc -cq 33 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
+        fprintf( fp, "ffmpeg -i \"%s\" -map 0:1 -map 0:0 -vcodec hevc_nvenc -cq 30 -pix_fmt p010le -acodec copy \"./output/%s\"\n", 
                     utf8_tc_str.c_str(), utf8_tc_str.c_str() );
+        // 8 bit
+        //fprintf( fp, "ffmpeg -i \"%s\" -map 0:0 -map 0:1 -vcodec hevc_nvenc -cq 31 -pix_fmt yuv420p -acodec copy \"./output/%s\"\n", 
+          //          utf8_tc_str.c_str(), utf8_tc_str.c_str() );
     }
 
     fclose(fp);
